@@ -257,17 +257,17 @@ mod tests {
                 };
 
                 let neuron4 = Neuron {
-                    bias: 1.0,
+                    bias: -1.0,
                     weights: vec![-0.2, 0.6, 0.1],
                 };
 
                 let neuron5 = Neuron {
-                    bias: 0.1,
+                    bias: -0.1,
                     weights: vec![0.7, -0.1, 0.4],
                 };
 
                 let neuron6 = Neuron {
-                    bias: 0.9,
+                    bias: -0.9,
                     weights: vec![0.4, 0.2],
                 };
 
@@ -288,8 +288,20 @@ mod tests {
                 };
 
                 // ReLU sanity check
-                let result = network.propagate(vec![-70.0, -70.0]);
-                assert_relative_eq!(result.as_slice(), &[1.3199999].as_ref());
+                let result = network.propagate(vec![-10.0, -10.0]);
+                assert_relative_eq!(result.as_slice(), &[0.0].as_ref());
+
+                // Testing the propagate function for real
+                // We calculate the output of each neuron separately for convenience
+                // And calculate the final network output to compare against the actual output
+                let result = network.propagate(vec![70.0, 60.0]);
+                let r_n1 = f32::max((70.0 * -0.3) + (60.0 * 0.8) + 0.5, 0.0);
+                let r_n2 = f32::max((70.0 * -0.1) + (60.0 * 0.4) + 0.4, 0.0);
+                let r_n3 = f32::max((70.0 * 0.4) + (60.0 * 0.9) + -0.3, 0.0);
+                let r_n4 = ((r_n1 * -0.2) + (r_n2 * 0.6) + (r_n3 * 0.1) - 1.0).max(0.0);
+                let r_n5 = ((r_n1 * 0.7) + (r_n2 * -0.1) + (r_n3 * 0.4) - 0.1).max(0.0);
+                let expected = &[((r_n4 * 0.4) + (r_n5 * 0.2) - 0.9).max(0.0)];
+                assert_relative_eq!(result.as_slice(), expected.as_ref());
             }
         }
     }
